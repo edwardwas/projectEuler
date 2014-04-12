@@ -27,6 +27,7 @@ primes n = helper [2..n]
                 | otherwise = p : helper (minus l [p,2*p..n])
                 where p = head l
 
+primeFactors :: Integral a => a -> [a]
 primeFactors 2 = [2]
 primeFactors 3 = [3]
 primeFactors n
@@ -34,14 +35,17 @@ primeFactors n
         | otherwise = primeFactors (head f) ++ primeFactors ( div n (head f) )
         where f = filter (\x -> mod n x == 0) [2 .. intSqrt n]
 
+isPalindrome :: Eq a => [a] -> Bool
 isPalindrome [] = True
 isPalindrome (x:[]) = True
 isPalindrome l
         | (head l) == (last l) = isPalindrome $ tail $ init l
         | otherwise = False
 
+digits :: Integral a => a -> [a]
 digits n
         | n < 10 = [n]
         | otherwise = (mod n 10) : (digits $ div n 10)
 
+isInt :: RealFrac a => a -> Bool
 isInt x = floor x == ceiling x
