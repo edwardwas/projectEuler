@@ -1,12 +1,20 @@
-
-factorPairs :: Int -> [(Int,Int)]
-factorPairs n = [(div n x,x) | x <- [1..n], mod n x == 0]
+import Data.List
 
 validPair :: (Int,Int) -> Bool
 validPair (u,v) = and [ 3*u > v,mod (u+v) 4 == 0, mod (3*u - v) 4 == 0]
 
-numSol :: Int -> Int
-numSol n = length $ filter validPair $ factorPairs n
+multPair :: (Int,Int) -> Int
+multPair (u,v) = u*v
 
-main = putStrLn $ show $ length $  filter (\x -> (numSol x) ==10) [1..10^6]
+isDivisable :: Int -> Int -> Bool
+isDivisable n x = mod n x == 0
 
+genPairs :: Int -> [(Int,Int)]
+genPairs n = concatMap (\v -> map (\u -> (v,u)) [1.. 1+div n v] )  [ 1..n]
+
+run :: Int -> Int -> Int
+--Calculate all value of which there are m soultions below n
+run n m = length $ filter (\x -> length x == m) $ takeWhile (\x -> head x < n) $ groupedVals n
+        where groupedVals n = group $ sort $ map multPair $ filter validPair $ genPairs n
+
+main = putStrLn $ show $ run (10^6) 10
