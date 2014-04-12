@@ -10,7 +10,7 @@ isDivisable :: Int -> Int -> Bool
 isDivisable n x = mod n x == 0
 
 genPairs :: Int -> [(Int,Int)]
-genPairs n = concatMap (\v -> map (\u -> (v,u)) [1.. 1+div n v] )  [ 1..n]
+genPairs n = concatMap (\v -> map (\u -> (v,u)) [1.. div n v] )  [ 1..n]
 
 run :: Int -> Int -> Int
 --Calculate all value of which there are m soultions below n
