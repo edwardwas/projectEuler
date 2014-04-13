@@ -1,5 +1,7 @@
 import Data.List
 import Data.List.Ordered hiding (union)
+import Data.Char
+import System.IO
 
 sol1 = sum $ union [3,6..999] [5,10..999]
 sol2 = sum $ filter (\x -> mod x 2 == 0) $ takeWhile (<=4*10^6) fib
@@ -11,10 +13,18 @@ sol5 = product $ map (\(u,v) -> u^v) $ zip p b
               p = primes 20
 sol6 = (sum [1..100]) ** 2 - sum (map (**2) [1..100])
 sol7 = last $ take 10001 $ primes (10^6)
+sol8 = do
+        contents <- readFile "008.txt"
+        let a = maximum $ map product $ breakToFive $ map digitToInt contents
+        print a
 
 fib = 1 : helper [1,1,2]
         where helper l = newTerm :  helper  ( newTerm : l)
                 where newTerm = head l + head  (tail l)
+
+breakToFive :: [a] -> [[a]]
+breakToFive (a:b:c:d:e:xs) = [[a,b,c,d,e]] ++ breakToFive (b:c:d:e:xs)
+breakToFive x = [x]
 
 intSqrt :: Integral a => a -> a
 intSqrt = floor . sqrt . fromIntegral
