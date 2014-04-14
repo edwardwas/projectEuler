@@ -1,7 +1,9 @@
 import Data.List
+import Data.Array
 import Data.List.Ordered hiding (union)
 import Data.Char
 import System.IO
+import qualified Data.Map as Map
 
 sol1 = sum $ union [3,6..999] [5,10..999]
 sol2 = sum $ filter (\x -> mod x 2 == 0) $ takeWhile (<=4*10^6) fib
@@ -17,6 +19,9 @@ sol8 = do
         contents <- readFile "008.txt"
         let a = maximum $ map product $ breakToFive $ map digitToInt contents
         print a
+sol10 = sum $ primes (2*10^6)
+sol12 = head $ dropWhile (\x -> numDivisors x < 500) triNum
+
 
 fib = 1 : helper [1,1,2]
         where helper l = newTerm :  helper  ( newTerm : l)
@@ -59,3 +64,23 @@ digits n
 
 isInt :: RealFrac a => a -> Bool
 isInt x = floor x == ceiling x
+
+numDivisors :: Integral a => a -> Int
+numDivisors n = product $ map (+1) $ map length $ group $ primeFactors n
+
+triNum :: Integral a => [a]
+triNum = map (\n -> div (n * (n+1) ) 2) [1..]
+
+
+collatzMem = listArray (1,n) $ map collatz [1..n]
+        where n = (10^6)
+
+collatz :: Integer -> Integer
+collatz 1 = 1
+collatz n
+        | inRange (bounds collatzMem) m = 1 + collatzMem ! m
+        | otherwise = 1 + collatz m
+        where m = case n of
+                1 -> 1
+                n | even n -> div n 2
+                  | otherwise -> 3 * n +  1
