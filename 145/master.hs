@@ -5,10 +5,10 @@ numDigits :: Integral a => a -> Int
 numDigits = length . iterDig
 
 revNum :: Integral a => a -> a
-revNum x = helper x $ (numDigits x) - 1
-	where helper n a
-		| n < 10 = n * (10^a)
-		| otherwise = ( (10^a) * (mod n 10) ) + (helper (div n 10) (a-1) )
+
+revNum n = sum $ map (\(u,v) -> u*v) $ zip a b
+	where a = reverse $ map (\x -> mod x 10) $ iterDig n
+	      b = take (length a) $ iterate (*10) 1
 
 firstDigit :: Integral a => a -> a
 firstDigit = last . iterDig 
@@ -17,5 +17,5 @@ isReversible :: Integral a => a -> Bool
 isReversible n = all odd $ iterDig  $ n + revNum n
 
 run :: Integral a => a -> Int
-run x = (*) 2 $ length $ filter isReversible $ filter (even . firstDigit) $ filter odd [1..x] 
-main = print $ run (10^9)
+run x = (*) 2 $ length $ filter isReversible $ filter (even . firstDigit) [1,3..x]
+main = print $ run (10^8)
