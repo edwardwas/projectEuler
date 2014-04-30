@@ -1,7 +1,10 @@
+nonChanging :: (Eq a) => [a] -> Maybe a
+nonChanging (x:[]) = Nothing
+nonChanging (x:xs)
+	| x == head xs = Just x
+	| otherwise = nonChanging xs
 
-hypExp a 1 = a
-hypExp a k = mod (a ^ (hypExp a (k-1))) (10^8)
+hypExp :: Integral a => a -> [a]
+hypExp a = scanl1 (\x y -> mod (y^x) (10^8)) $ repeat a
 
-hypExp' a = scanl1 (\x y -> mod (y^x) (10^8)) $ repeat a
-
-main = print $ last $ take 1855 $ hypExp' 1777 
+main = print $ nonChanging $ hypExp 1777
