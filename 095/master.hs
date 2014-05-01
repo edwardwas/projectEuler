@@ -25,18 +25,18 @@ numDiv n = (product $ map helper $ group $ primeFactor n) - n
 		where p = head x
 		      a = length x
 
-amChain :: Integer  -> Int
-amChain n 
-	| head h == last h = length h
-	| otherwise = 0
-	where h = helper n []
-		where helper x l
-			| x >= 10^6 = [x]
-			| any (\y -> x == y) l = x:l
-			| otherwise = helper (numDiv x) (x:l)
-
 run m = head $ filter (\(u,v) -> v == maxLength) $ zip [2..m] chainLengths
 	where chainLengths = map amChain [2..m]
 	      maxLength = maximum $ chainLengths
 
 main = print $ run (10^6)
+
+
+amChain n = loopCheck [] $ iterate (numDiv) n
+	where	loopCheck [] (x:xs) = loopCheck [x] xs
+		loopCheck k (x:xs)
+			| x == 1 = 0
+			| x >= 10^6 = 0
+			| last k == x = (length k) 
+			| any (\y -> x ==y) $ init k = 0
+			| otherwise = loopCheck (x:k) xs
