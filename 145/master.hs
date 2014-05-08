@@ -5,7 +5,6 @@ numDigits :: Integral a => a -> Int
 numDigits = length . iterDig
 
 revNum :: Integral a => a -> a
-
 revNum n = sum $ map (\(u,v) -> u*v) $ zip a b
 	where a = reverse $ map (\x -> mod x 10) $ iterDig n
 	      b = take (length a) $ iterate (*10) 1
