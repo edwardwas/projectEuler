@@ -8,9 +8,8 @@ xorSum :: Bits a => [a] -> a
 xorSum (l:ls) = foldl (\acc x -> xor acc x) l ls
 
 padToSame :: Num a => [[a]] -> [[a]]
-padToSame x = map helper x
+padToSame x = map (\y -> (replicate (maxL - length y) 0) ++ y) x
 	where maxL = maximum $ map length x
-              helper a = if length a < maxL then helper (0:a)  else a
 
 nimSum :: (Bits a, Integral a) => [a] -> a
 nimSum = sum . map xorSum . transpose . padToSame . map toBinary 

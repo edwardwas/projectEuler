@@ -6,6 +6,7 @@ reduce (x:xs) n | mod n x == 0 = reduce (x:xs) (div n x)
 terminating :: Integral a => a -> a -> Bool
 terminating p q = 1 == reduce [2,5]  (div q $ gcd p q)
 
+d :: Integral a => a -> a
 d x = sum [if terminating n (round $ fromIntegral n /e) then -n else n | n <- [5..x]]
 	where e = exp(1)
 
