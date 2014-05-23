@@ -26,7 +26,7 @@ isListCyc :: Integral a => [(a,a)] -> Bool
 isListCyc x = isNextCyc (snd $ head x) (snd $ last x)
 
 run l = filter (isListCyc) $ filter (\x -> length x == n) $ concat 
-	$ map (\z -> getList f n [[z]]) $ head f
+	$ map (\z -> getList f n [[z]]) $ last f
 	where f = fList l
 	      n = length l
 
