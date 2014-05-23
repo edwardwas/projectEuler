@@ -1,10 +1,9 @@
 import Data.Numbers.Primes
 
-f :: Integral a => a -> a -> a
-f n p = if even n then 2 else 2*p*n
-
 run :: Integral a => a -> a
-run t = fst $ head $ filter (\x -> snd x > t) $
-        map (\(n,p) -> (n,f n p)) $ zip [1..] primes
+run t = fst $ head $ 
+        dropWhile(\(n,p) -> 2*n*p< t) $ 
+        dropAlt $ zip [1..] primes
+        where dropAlt (x1:_:xs) = x1 : dropAlt xs
 
 main = print $ run $ 10^10
