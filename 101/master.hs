@@ -13,8 +13,8 @@ makeVector :: (Element t, Num t) => [t] -> Matrix t
 makeVector = fromLists . transpose . flip (:) [] 
 
 optPoly :: [Double] -> [Double]
-optPoly s = head $ transpose $ toLists $ mXm 
-	(inv $ genInputMatrix $ map integral2Double [1 .. length s]) $ 
+optPoly s = map (fromIntegral . round) $ head $ transpose $ toLists $ linearSolve
+	(genInputMatrix $ map integral2Double [1 .. length s]) $ 
 	makeVector s
 
 seqTerm :: Num a => [a] -> a -> a
@@ -39,5 +39,5 @@ run = sum . map abs . allFITS
 testSeq = [0,0,0,1] :: [Double]
 finalSeq = take 11 $ concat $ repeat [1,-1] ::[Double]
 
-main = print $ run finalSeq
+main = print $ floor $ run finalSeq
 
