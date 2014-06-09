@@ -1,15 +1,20 @@
+import Data.List
 
-fib :: [Integer]
-fib = [1,1] ++ (helper [1,1])
-	where helper l = x : (helper (x:l))
-		where x = (head l) + (head $ tail l)
+
+fib = scanl (+) 0 (1:fib)
+
+int2dig :: Integral a => a -> [a]
+int2dig = map (flip (mod) 10) . takeWhile (>0) . iterate (flip (div) 10)
+
+firstDigits :: Integral a => Int -> a -> [a]
+firstDigits n = take n . int2dig
 
 lastDigits :: Integral a => Int -> a -> [a]
-lastDigits n = map (flip (mod) 10) . take n . iterate (flip (div) 10) 
+lastDigits n = take n . reverse . int2dig
 
-panDigital :: Integral a => [a] -> Bool
-panDigital l = and $ map (flip (elem) l) [1..9]
+isPanDigital :: Integral a => [a] -> Bool
+isPanDigital x = (sort x) == [1..9]
 
-numDigits :: Integer -> Integer
-numDigits = (+) 1 . floor . logBase 10 . fromIntegral 
-
+main = print $ snd $ head $ 
+        filter (isPanDigital . firstDigits 9 . fst) $ 
+        filter (isPanDigital . lastDigits 9 . fst) $ zip fib [0..]
