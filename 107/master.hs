@@ -2,6 +2,7 @@ import Data.List
 import Data.Ord
 import Data.Maybe
 import Data.Either
+import System.Environment 
 ------Imports for CSV-------------
 import Text.ParserCombinators.Parsec
 import Data.CSV
@@ -41,12 +42,16 @@ removeBack = filter (\(Edge a b _) -> a > b)
 primmSaving :: Tree -> Integer
 primmSaving t = (treeWeight $ removeBack t) - (treeWeight $ primms t)
 
+list2Edges :: [[Maybe Integer]] -> Tree
 list2Edges l = map fromJust $ filter (/= Nothing) $
         map helper [(x-1,y-1) | x <- [1.. length l], y <- [1..length l]] 
         where helper (x,y) = if w == Nothing then Nothing else Just (Edge x y (fromJust w))
                 where w = (l !! x) !! y
 
+string2Edges :: [[String]] -> Tree
+string2Edges = list2Edges . map (map (\x -> if x == "-" then Nothing else Just (read x :: Integer)) ) 
+
 main = do
-        results <- parseFromFile csvFile "network.txt"
-        print $ primmSaving $ list2Edges $ 
-                map (map (\x -> if x == "-" then Nothing else Just (read x :: Integer)) ) $ head $ rights $ [results]
+        args <- getArgs
+        results <- parseFromFile csvFile $ head args
+        print $ primmSaving $ string2Edges $ head $ rights $ [results]
