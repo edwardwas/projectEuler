@@ -1,47 +1,31 @@
-import Control.Lens
-import Data.Maybe
+import Data.List
 
---Type Declerations--
-type Matrix = [[Integer]]
-type Vector = [Integer]
-data Tree = Node Int Integer [Tree] deriving (Show)
+data Edge = Edge Int Int Integer deriving (Show,Eq)
+--Edge = Start End Weight
+data Node = Node Bool Integer deriving (Show)
+--Node = Visited tentative number
 
---Constant Declerations--
-infinity = 9999999999
-
---Testing Values--
-nodes = [121,956,37,331]
-
---Helper Functions --
-blankPaths :: Int -> Matrix
-blankPaths l = replicate l $ replicate l infinity :: Matrix
-
-populatePaths :: Vector -> Matrix
-populatePaths n = foldr (\(u,v) acc -> set (ix u . ix v) (n !! v) acc) b v
-	where v = makeValidPaths l
-	      b = blankPaths $ l*l
-	      l = floor $ sqrt $ fromIntegral $ length n
+bigNum :: Integer
+bigNum = 99999999999
 
 
-getNeigh :: Matrix -> Int -> [(Int,Integer)]
-getNeigh p t = filter (\(u,v) -> v /= infinity) $ zip [0..] $ map (getVertex p t) [0..(length p)-1]
+isFrom :: Int -> Edge -> Bool
+isFrom i (Edge a _ _) = i == a
 
-getVertex :: Matrix -> Int -> Int -> Integer
-getVertex p t f = fromJust $ preview (ix t . ix f) p
+isNodeVisited :: Node -> Bool
+isNodeVisited (Node v _) = v
 
-makeValidPaths :: Int  -> [(Int,Int)]
-makeValidPaths l = lr ++ tb
-	where lr = map (\x -> (x,x+1)) $ filter (\x -> mod (x+1) l /= 0) [0..l*l-1]
-	      tb = map (\x -> (x,x+l)) [0..l*l - l - 1]
+vertexsFrom :: Int -> [Edge] -> [Edge]
+vertexsFrom node = filter (isFrom node)
 
-shortPath :: Matrix -> Int -> Int -> Int -> Integer
-shortPath p i j 0 = getVertex p i j
-shortPath p i j k = min s1 $ s2 + s3
-	where s1 = shortPath p i j (k-1)
-	      s2 = shortPath p i k (k-1)
-	      s3 = shortPath p k j (k-1)
+visited :: [Node] -> [Node]
+visited = filter (\(Node v _) -> v)
 
-main = print $ shortPath pp 0 l l
-	where pp = populatePaths nodes
-	      l = (length nodes) - 1
-	      nodes = [1..4^2]
+unvisited :: [Node] -> [Node]
+unvisited = filter (\(Node v _) -> not v)
+
+nodesInTree :: [Edge] -> [Int]
+nodesInTree = nub . concat . map (\(Edge a b _) -> [a,b])
+
+startList :: [Edge] -> [Node]
+startList e = (Node True 0):(replicate (length $ nodesInTree e) (Node False bigNum))
