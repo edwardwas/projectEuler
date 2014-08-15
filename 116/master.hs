@@ -1,11 +1,7 @@
 import System.Environment
 import Data.Array
 
-fitings rl tl
-        | tl > rl = 0
-        | tl == rl = 1
-        | otherwise = sum $ map ((+) 1 . flip (fitings) tl . (-) (rl - tl)) [0..(rl-tl)]
-
+fit :: (Integral a, Ix a) => a -> a -> a
 fit rl tl = helper rl
 	where helper x
 		| x < tl = 0

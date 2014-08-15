@@ -1,44 +1,36 @@
-import System.Random
-import Data.List
+import Numeric.LinearAlgebra
+import Data.Packed.Matrix
+import Data.Packed.Vector
 
-gridSize = 30 :: Integer
+gridSize = 30  :: Int
 
-type Flea = (Integer,Integer)
+type Flea = (Int,Int)
 
-isValid :: Flea -> Bool
-isValid (x,y) = and [x >= 0, y >= 0, x < gridSize, y <gridSize]
+moveOptions :: Flea -> [Flea]
+moveOptions (x,y) = filter f $ [(x-1,y),(x+1,y),(x,y-1),(x,y+1)]
+	where f (x,y) = and [x>=0,y>=0,x<gridSize,y<gridSize]
 
-addVec :: (Integer,Integer) -> (Integer,Integer) -> (Integer,Integer)
-addVec (ax,ay) (bx,by) = (ax+bx,ay+by)
+stateVector :: Flea -> Float ->  Vector Float
+stateVector (a,b) k = flatten $ buildMatrix gridSize gridSize (\pos -> if f pos then val*k else 0)
+	where f (x,y) = 1 == ( (abs $ x-a) + (abs $ y-b) )
+	      val = (fromIntegral $ length $ moveOptions (a,b)) ** (-1)
 
-getOptions :: Flea -> [Flea]
-getOptions f = filter (isValid) $ map (addVec f) $ [(0,-1),(0,1),(1,0),(-1,0)]
+startMatrix :: Matrix  Float
+startMatrix = ident $ gridSize ^ 2
 
-choice :: [a] -> StdGen -> (a,StdGen)
-choice l g = (c,newG)
-        where (i,newG) = randomR (0, length l - 1) g :: (Int,StdGen)
-              c = l !! i
+genAllFleas :: [Flea]
+genAllFleas = [(x,y) | x <- [0..gridSize - 1],  y <- [0 .. gridSize - 1]]
 
-makeJump :: Flea -> StdGen -> (Flea,StdGen)
-makeJump f g = choice (getOptions f) g
+transitionMatrix :: Matrix Float -> Matrix Float
+transitionMatrix = fromColumns . zipWith (stateVector) (genAllFleas) . getProbs 
 
-updateGrid :: [Flea] -> StdGen -> ([Flea],StdGen)
-updateGrid f g = (map fst l, snd $ last l)
-        where l = scanl (\(_,r) x -> makeJump x r) (head f,g) $ tail f
+doSim :: Int -> [Matrix Float]
+doSim n = take (n+1) $ iterate (transitionMatrix) startMatrix
 
-startGrid :: Integer -> [Flea]
-startGrid s = [(x,y) | x <- [0..s-1],y<-[0..s-1]]
+getProbs :: Matrix Float -> [Float]
+getProbs = map (sum.toList) . toRows
 
-unoccupied :: Integer -> [Flea] -> Int
-unoccupied s l = length $ foldl (\x f -> delete f x) (startGrid s) l
+run = sum  $ map (\x -> 1 - x) $  getProbs $ last $ doSim 50 
 
-iterateGrid :: ([Flea],StdGen) -> ([Flea],StdGen)
-iterateGrid (f,g) = updateGrid f g
+main = print $ run
 
-runSim s = do
-        g <- newStdGen
-        return $ unoccupied s $ fst $ last $ take 50 $ iterate iterateGrid $ (startGrid s,g)
-
-main = do
-        a <- runSim 30
-        print a

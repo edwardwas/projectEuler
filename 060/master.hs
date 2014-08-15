@@ -7,7 +7,7 @@ import System.Random
 import Primes as OP
 
 isPrime :: Integer -> Integer -> Bool
-isPrime start x = fst $ OP.check x 5 $ mkStdGen 100
+isPrime start x = fst $ OP.check x 15 $ mkStdGen 100
 isPrime' start x = member x $ dropWhile (< start) $ Primes.primes
 
 dig2num :: Integral a => [a] -> a
