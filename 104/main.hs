@@ -1,4 +1,4 @@
-import Data.List
+import Data.List (delete)
 
 firstDigs :: (Integral a, Integral b, Integral c) => a -> b -> c
 --Works using the golden ratio approach
@@ -17,9 +17,9 @@ digs = map (flip mod 10) . takeWhile (>0) . iterate (flip div 10)
 isPandigital :: Integral a => [a] -> Bool
 isPandigital = helper [1..9]
 	where 	helper [] [] = True
-	  	helper (x:xs) l = case (find (==x) l) of
-			Just y -> helper xs $ delete x l
-			Nothing -> False
+	  	helper (x:xs) l
+			| elem x l = helper xs $ delete x l
+			| otherwise = False
 
 findFirst :: (a -> Bool) -> [a] -> a
 findFirst f = head . filter f
