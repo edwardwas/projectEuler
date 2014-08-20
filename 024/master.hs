@@ -1,9 +1,6 @@
 import Data.List
 
-list2int :: Integral a => [a] -> a
-list2int = sum . zipWith (*) (iterate (*10) 1) . reverse
+digits2Num :: Integral a => [a] -> a
+digits2Num = sum . zipWith (*) (iterate (*10) 1) . reverse
 
-run :: Integral a => a -> Int -> a
-run n = list2int . (!!) (sort $ permutations [0..n])
-
-main = print $ run 9 $ 10^6 -1
+main = print $ digits2Num $ flip (!!) (10^6 - 1) $ sort $ permutations [0..9]

@@ -1,0 +1,7 @@
+This problem is rendered fairly trivial when we remeber that Data.List contains a permuatation function. The code looks like the following.
+
+\lstinputlisting{../024/master.hs}
+
+The only new own defined function here is \textit{digits2Num}, which works as explained in problem 20. The code works by creating all the permutations of the numbers 0 to 9, and then sorting them. It then finds the millionth number, rembering to account for an of by one error. This is converted back to a number, and is printed.
+
+Although this should be slow, for this problem, it runs in under 8 seconds on my desktop.

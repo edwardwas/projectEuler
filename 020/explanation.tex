@@ -1,0 +1,9 @@
+This problem was solved simply by brute force. It involves calculating the digital sum of the factorial of 100. The factorial of 100 has 157 digits (from direct calculate), so should be no problem for a computer to hold. The code is as follows.
+
+\lstinputlisting{../020/main.hs}
+
+The two important parts of the code are \textit{fact} and \textit{digSum}. \textit{fact} calculates the factorial by using a fold to construct $\text{fact} (n) = 1 \times 2 \ldots (n-1) \times n$. There is no special trick here, it just produces the number.
+
+\textit{digSum} works by diving the starting number $10$, ignoring the remainder, until $0$ is reached. At this point, the modulus by ten is taken of each of the calculated numbers, giving a stream of digits. This is then summed over.
+
+The only thing that remains is to combine these two functions and print them, as shown in \textit{main}. The code runs in under 0.003 seconds on my desktop, so is plenty fast enough.
