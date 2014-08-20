@@ -1,0 +1,39 @@
+Problem 96 require us to write a general soduko solver. The solution here relies on brute force - each possible number is tried in each possible square until a solution is found. This is not a mathematically interesting problem, but rather one of programming.
+
+The first question is what data structure to use to hold the soduko grid. Although the obvious answer would be a two dimensional matrix, instead I have opted for a map from a tuple of two ints to a maybe int. This was a mixed blessing: although it made the function for getting a square easier, it made many over functions more cumbersome and introduced some overhead. However, the code runs in under a minute, so I chose not to further optimise.
+
+As this problem is more general than the norm for a project Euler problem, it has been split into four separate Haskell programs. The first of which, Helper.hs, is as follows.
+
+\lstinputlisting{../096/Helper.hs}
+
+This contains type definitions for the problem, along with a single function, \textit{allPairs}. This takes two lists, and returns a list of all possible tuples which take one element from both lists. It is important to note that \textit{allPairs [0..8] [0..8]} returns a list of all indexes on the grid.
+
+GridParser.hs contains the code for transforming the input text file into a grid for our use.
+
+\lstinputlisting{../096/GridParser.hs}
+
+Let us start and the beginning of the parser and work backwards. \textit{parseAllGrids} is the actual parser called, and simple repeatedly applies the \textit{parseGrid} parser, which discards one line, then takes 9 more which are converted to a grid using \textit{gridFromString}. The \textit{line} parser takes any number of alpha-numeric characters or spaces and returns them as a string after it finds a new line.
+
+\textit{gridFromString} is a bit of a misnomer - it actually works on a list of strings. It first converts each Char into a Maybe Int, with 0 being replace with Nothing and Just x for all other characters. This is zipped with \textit{allPairs [0..8] [0..8]}, which is a list of all possible pairs, the created into a map.
+
+It is important to note that this parser is incredible fragile. It requires the text file to be in the same format as the project Euler file - any other will either cause a crash pr unexpected behaviour. If \textit{gridFromString} is passed a list which is more that a nine by nine array of Chars, strange behaviour will occur. However, it is sutible for our needs.
+
+Solve.hs contains the implementation of the actual solver.
+
+\lstinputlisting{../096/Solve.hs}
+
+We shall start by discussing some of helper functions here before going on the actual solving algorithm. \textit{allToChange} returns a list of indexes where the Grid equals Nothing - a list of places where the grid still needs work. \textit{indexesToVec} uses these functions to get a list of all possible values that a grid location can take. It is important to note that this function will not run correctly if the location is already none.
+
+With these functions, we can write our solver function. \textit{solveGrid} takes a grid and returns either a Just a solved grid or nothing if it is unsolvable. Firstly, the locations of all unknown squares. If there isn't such a square, the grid is solved. If not, it calls \textit{helper} with all the possible values the first unknown square could take. \textit{helper} then traverses the list of options. For each value, it calls \textit{solveGrid} with the value at the given location changed to the new option. This is called recursively to apply all possible options.
+
+If \textit{helper} finds a solution, it returns Just the grid. This is carried all the way up the recursions and is returns the solved grid. If the solution is not valid, helper continues to the next option. If there are no more options, then the grid is not solvable in it's current form. If this is the first call, this means the grid as a whole is unsolvable.
+
+We can now use main.hs to combine everything and get and answer.
+
+\lstinputlisting{../096/main.hs}
+
+\textit{getGrids} takes a file location, and reads a list of Grids from the file. If there is an error, the program crashes using the error method. \textit{tidyString} simply appends a new line to the end of a string if there isn't one already. This is because the parser will crash otherwise. I said it was brittle.
+
+\textit{getThreeDigits} get the three digits across the top left of the grid, and combined with \textit{digsToNum}, produces the answer needed for the question. \textit{run} takes as file path, solves all the grids in the file and the calculates the sum of the top three digits. \textit{main} takes the first argument as the file path and then prints the answer.
+
+Although this method seems at first to computational expensive, the solution for the 50 grids takes roughly six seconds to run on my desktop: well under the required speed. Although there should be a method for solving this analytically, that seemed more bother than it was worth, and may not even produce a speed up.
