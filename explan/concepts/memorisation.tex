@@ -1,0 +1,25 @@
+For many problems, some calculations will be repeated many times. This is a waste of resources, so we can stored the calculations for laster. Consider the example below for calculating the Fibonacii numbers.
+
+\begin{lstlisting}
+fib :: Integral a => a -> a
+fib 1 = 1
+fib 0 = 0
+fib n = (fib $ n-1) + (fib $ n-2)
+\end{lstlisting}
+
+All calls to \textit{fib} with a number greater than $n$ calls \textit{fib n}. This can become very wasteful if we had to calculate \textit{fib} often. Hence we can stored intermediate results for later collection. This is done as follows.
+
+\begin{lstlisting}
+import Data.Array
+
+fib :: Integral a => a -> a
+fib n = dp ! n
+	where dp = array (0,limit) [(i,f i) | i <- [0 .. limit]]
+	      f 0 = 0
+	      f 1 = 1
+	      f n = (fib $ n - 1) + (fib $ n -2)
+\end{lstlisting}
+
+The important work is done here by Haskell's inbuilt laziness and the storage array. When \textit{fib n} is called, it looks up the $n^\text{th}$ value in array \textit{dp}. This gives the value of our function \textit{f}, which is defined the same as our old \textit{fib} function. Because of laziness, the array starts of as an array of thunks: it doesn't calculate the function until called. So, when the function is called the first time it is calculated, and from then on the answer is simply retrieved.
+
+This method has some drawbacks. Firstly, the entire calculation must be stored in memeory. Secondly, the range of the calculation must be calculated in advnce. It is safe to use a high upper limit, as calls aren't used until called, but this is an extra constraint.

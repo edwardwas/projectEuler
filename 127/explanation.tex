@@ -1,0 +1,54 @@
+Before we begin, this is not a good solution to problem 127. The rule of thumb for project Euler problems is that they should run in under 1 minute: this code took about twenty on my desktop. However, from further research there are no simple mathematical solutions, so this is what I have.
+
+We shall start with two interesting properties of the radical of a number. Firstly, the radical is multiplicative - $rad(a b) = rad(a) rad(b)$ if and only if $a$ and $b$ are coprime. $a$ and $b$ are coprime if and only if $gcd(a,b) = 1$; they share no divisors. As a condition of our problem, $a$, $b$ and $c$ are all coprime to each other, so we can rewrite condition 4 of the problem as follows.
+
+\begin{equation}
+rad(abc) = rad(a) rad (b) rad (c)
+\end{equation}
+
+Secondly, the radical of a number is equal to its largest square free divisor. A square free number is one that has no repeat numbers in its prime factorization. For example, $10$ is square free but $18$ is not. If a number is square free itself, it follows that its radical is itself. From this, we can deduce that $c$ cannot be square free as follows from constraint 4.
+
+\begin{align}
+	c &> rad(a) rad(b) rad(c) \\
+	&> c rad(a) rad(b) \\
+	1 &> rad(a) rad(b)
+\end{align}
+
+The smallest numbers that $a$ and $b$ can take ia $1$ and $2$, make the smallest the last right hand can take is $2$, meaning that this equalitiy is always invalid.
+
+Using this restraint, we can now attempt a brute force approach. To do so, we shall iterate over all $a$s and then all $c$s. The choice of which two varibles to iterate over is abitrary - this was a personal preferance.
+
+To iterate over $a$, we must choose upper and lower limits. We shall start by defining $l$ as the limit that our values of $c$ must not exceed of equal. To find our upper limit, we shall take the lowest possible value of $b$, and re-arrange to find the max value of $a$.
+
+\begin{align}
+	l &> c \\
+	l &> a_{\text{max}} + b \\
+	l &> a_\text{max} + a_\text{max} + 1 \\
+	l &> 2 a_\text{max} + 1 \\
+	\dfrac{l - 1}{2} &> a_\text{max}
+\end{align}
+
+As $a$ must be an integer, $a_\text{max} = \dfrac{l-3}{2}$. Using a similar technique, we can show that, for a given $a$, $c$ runs from $2a + 1$ to $l - 1$.
+
+As a final constraint, we note that we only need to calculate the gcd once. If we filter out all $c$ that $gcd(a,c) \neq 1$, no more gcd calculations are needed for $b$. We can rearrange the gcd of $a$, $b$ and $c$ to prove that it is $1$, given that $gcd(a,c) = 1$.
+
+\begin{align}
+	gcd(a,b,c) &= gcd(a,c,b) \\
+	&= gcd( gcd(a,c),b) \\
+	&= gcd(1,b) \\
+	&= 1
+\end{align}
+
+We can now discuss implementation. Below is the source code of the solution.
+
+\lstinputlisting{../127/main.hs}
+
+Both \textit{isSquareFree} and \textit{rad} use memorisation, as is discussed in section \ref{sec:memorisation}.
+
+We shall begin by discussing two standard functions, \textit{factors} and \textit{nextPrimeFactor}. The first simply calculates all the factors of $n$ by checking each possible number in turn, skipping $1$, but including $n$. $n$ is included for the calculation of \textit{rad} later. \textit{nextPrimeFactor} returns the smallest prime factor of a number $n$. Note this always terminates - if $n$ is prime it will return $n$ otherwise it will return a factor.
+
+\textit{isSquareFree} returns true if a number $n$ is square free. It does this by recursivly finding the next smallest prime factor of a number and keeping track of all that it has visited. If it finds a factor it has already used, the number is not square free, so false is returned. This continues down until $n=1$, which means that the number is square free.
+
+\textit{rad} calculates the radical of a number by looking for its largest square free factor. It does this by reverse the list of factors from \textit{factors} and returning the first square free factor it finds. Given a value of $a$ and an upper bound $l$, \textit{genAllC} gives a list of tuples of all possible pairs $a$ and $c$. This is achieved by filtering out all values of $c$ that are not coprime with $a$ and are square free. This means that to verify that we have a hit all \textit{hit} needs to do is check that $c > (rad a b c)$.
+
+\textit{getAll} takes a limit, and returns a list of all hits in the form of tuples ($a$,$c$). All that's left is to sum the $c$ values and problem is solved.
