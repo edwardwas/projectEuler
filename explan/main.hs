@@ -1,8 +1,26 @@
 {-# LANGUAGE OverloadedStrings #-}
 
 import Text.LaTeX
+import System.Directory
+import System.FilePath.Posix
+import Control.Applicative
+import qualified Data.Char as C
 
-packages = ["amsmath","listings","color"] :: [PackageName]
+toTitle :: String -> String
+toTitle (x:xs) = (C.toUpper x):xs
+
+isTex :: String -> Bool
+isTex s = (a /= "") && (b == ".tex")
+	where (a,b) = splitExtension s
+
+addConcept :: Monad m => String -> LaTeXT_ m
+addConcept s = (section $ fromString $ toTitle $ fst $ splitExtensions s) <> 
+		(input $ fromString "concepts/"++s)
+
+theConcepts :: Monad m => [String] -> LaTeXT_ m
+theConcepts f = mconcat $ map (addConcept) $ filter (isTex) f
+
+packages = ["amsmath","listings","color","hyperref"] :: [PackageName]
 subDirs = ["020","024","096"] :: [String]
 
 stripLeadingZeros :: String -> String
@@ -15,7 +33,7 @@ getSubDir s = do
 
 thePreamble :: Monad m => LaTeXT_ m
 thePreamble = do
-	documentclass [a4paper] article
+	documentclass [a4paper] report
 	title "Explanations of Project Euler Solutions"
 	author "Edward Wastell"
 	mconcat $ map (usepackage []) packages
@@ -25,11 +43,17 @@ theBody = do
 	maketitle
 	tableofcontents
 	input "config.tex"
-	mconcat $ map (getSubDir) subDirs
 
-comb :: Monad m => LaTeXT_ m
-comb = do
+comb f = do
 	thePreamble
-	document theBody
+	document $ mconcat [
+		theBody, 
+		chapter "Concepts",
+		theConcepts f,
+		chapter "Solutions",
+		mconcat $ map (getSubDir) subDirs
+		]
 
-main = execLaTeXT comb >>= renderFile "main.tex"
+main = do
+	c <- (comb) <$> getDirectoryContents "concepts/"
+	execLaTeXT c >>= renderFile "main.tex"
