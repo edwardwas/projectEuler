@@ -1,0 +1,7 @@
+In many of the project Euler problems, we need to find the prime factorization of a number. This involves writing a number $x$ as a product of a list primes $p$. From the fundamental theorem of arithmetic, each number has only one list $p$ associated with. 
+
+There are many different ways of factoring a number. The first discussed here is trial division. This involves a recursive algorithm, defined as follows.
+
+\lstinputlisting{concepts/fact/examp1.hs}
+
+$f$ is a list of all numbers smaller than $\sqrt{n}$ that are factors of $n$. If this is an empty list, $n$ must be primes. The prime factorisation of a prime is just a list of itself. Otherwise, $n$ is composite, so can be written as $n = hk$, where h is the first element of $f$. As the numbers are arrange in ascending order 
