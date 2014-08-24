@@ -1,0 +1,80 @@
+Unlike most problems, I have tackled two problems at a time here - 108 and 110. As 110 is just an optimised version of 108, they actual use the same method and code.
+
+Both problems require us to look for the number of solutions to 
+
+\begin{equation}
+	\label{eq:108prob}
+	\dfrac{1}{x} + \dfrac{1}{y} = \dfrac{1}{n}
+\end{equation}
+
+for any given n. To begin with, we can re-arranging this, and using a substitution of $k = y - n$, we can write
+
+\begin{equation}
+	x = n + \dfrac{n^2}{k}
+	\label{eq:108x}
+\end{equation}
+
+From this, we can see that there is only an integer solution to $x$ when $k$ is a factor of $n^2$. We have only one constraint on $k$, which we recover from setting $x \geq y$. This constrain is to stop us double counting results - we could equally exchange $x$ and $y$ to get the same result. By using $y = k +n$ and equation \ref{eq:108x}, we can say
+
+\begin{equation}
+	k + n \leq = n + \dfrac{n^2}{k}
+\end{equation}
+
+This can be arranged to recover $k \leq n$. This removes half of the divisors of $n^2$, so the number of solutions for our problem, defined as $f$ is as follows.
+
+\begin{equation}
+	\label{eq:108f}
+	f = \dfrac{\sigma_0(n^2) + 1}{2}
+\end{equation}
+
+where $\sigma_0(x)$ is the divisors of $x$. This is the only part of the problem that is difficult to calculate quickly.
+
+From the fundamental theorem of arithmetic, each number can be written in the following form.
+
+\begin{equation}
+	x = \prod_{p_i \in P} p_i ^{a_i}
+\end{equation}
+
+where $P$ is the set of all primes. Note that $a_i$ can, and often is, equal to $0$. From this form of $x$, we can write $\sigma_0(x)$ as
+
+\begin{equation}
+	\sigma_0(x) = \prod _i (1 + a_i)
+\end{equation}
+
+There are two important insights to be gained from writing the product as this. Firstly, by factorizing our number into its prime factors, we can quickly calculate the number of divisors it has without trying every number less that $\sqrt{x}$ in turn. This allows us to write some code that calculate the number of solutions to equation \ref{eq:108prob}. That code is as follows.
+
+\begin{lstlisting}
+count :: Eq a => a -> [a] -> Int
+count x = length . filter (== x)
+
+numAnswers :: dots Integral a => a -> Int
+numAnswers n = flip div 2 $ (+1) $ product $ map ((+1) . (*2) . flip count fs) $ nub fs
+        where fs = factorize n
+
+\end{lstlisting}
+
+\textit{count x l} returns the number of times $x$ occurs in the list $l$. \textit{numAnswers} actually calculates $f$, but in a resonably complicated way. From left to right until the \textit{product} is simply equation \ref{eq:108f} and after that until the end of the first line it is $\sigma_0{n^2}$, if and only if \textit{fs} is a list of the prime factors of $n$. It follows that the factorization of $n^2$ is equal to the product of the factorization of $n$ and $n$. When taking the product of two exponents, we can simply add then, so to get the factorization of $n^2$ from $n$, we simply replace $a_i \to 2a_i$.
+
+All though this would probably be acceptable for problem 108, problem 110 requies we make another inverance. As $f$ depends directly on $\sigma_0(n^2)$, large values of $f$ come from nubmers with many divisors. Hence, it is not nessacery to calculate $f$ for all values, just ones with many primes.
+
+To do this, we defince a function $p(x)$ as follows
+
+\begin{equation}
+	p(x) = \prod _{p_i \in P} ^{p_i < x} p_i
+\end{equation}
+
+Large values of $f$ will be occur when $n$ is of the form $m p(x)$, where $m$ is an integer. We can now right the code which allows us to find our answer.
+
+\begin{lstlisting}
+lotsOPrimes :: Integral a => a -> a
+lotsOPrimes x  = product $ takeWhile (<x) $ primes
+
+run :: Integral a => Int -> a -> a
+run t x = head $ filter (( >t) . numAnswers) $ map (*lotsOPrimes x) [1..]
+\end{lstlisting}
+
+\textit{lotsOPrimes x} is simply $p(x)$. \textit{run} takes two parameters: the target $f$ must excede and $x$ for $p(x)$.  It works by creating a list of increasing numbers of the form $m p(x)$, and checking if their value of $f$ is greater than $t$. It returns the first number that fits this mold.
+
+Care must be chosen when choosing our value of $x$. If it is too high, we will get a value that is not the minimun. If it is too low, the code wil take a long time to run. For problem 108, 15 was chosen and 40 for 110.
+
+

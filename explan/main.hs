@@ -22,7 +22,7 @@ theConcepts :: Monad m => [String] -> LaTeXT_ m
 theConcepts f = mconcat $ map (addConcept) $ filter (isTex) f
 
 packages = ["amsmath","listings","color","hyperref"] :: [PackageName]
-subDirs = ["020","024","096","127"] :: [String]
+subDirs = ["020","024","096","108","127"] :: [String]
 
 stripLeadingZeros :: String -> String
 stripLeadingZeros s@(x:xs) = if x == '0' then stripLeadingZeros xs else s
