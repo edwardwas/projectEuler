@@ -1,22 +1,20 @@
-
-
 intSqrt :: Integral a => a -> a
 intSqrt = floor . sqrt . fromIntegral
 
-factorPairs :: Integral a => a -> [(a,a)]
-factorPairs n = map (\x -> (x,div n x)) $ filter ((== 0) . mod n) [2..intSqrt n]
+factors :: Integral a => a -> [(a,a)]
+factors n = map (\x -> (div n x,x)) $ filter ( (==0) . mod n) [2,4.. intSqrt n]
 
-bothEvenOrOdd :: Integral a => (a,a) -> Bool
-bothEvenOrOdd (x,y)
+isValid :: Integral a => (a,a) -> Bool
+isValid (x,y) 
 	| x == y = False
-	| odd x = odd y
-	| otherwise = even y
+	| odd x = False
+	| otherwise = True
 
-l :: Integral a => a -> Int
-l = length . filter bothEvenOrOdd . factorPairs
+calL :: Integral a => a -> Int
+calL = length . filter (isValid) . factors 
 
-calN :: [Int] -> Int -> Int
-calN  lValues n = length $ filter (== n) lValues
+calT :: Eq a => [a] -> a -> Int
+calT lVal x = length $ filter (==x) $ lVal
 
-main = print $ calN lVals 15
-	where lVals = map l [1..10^6]
+main = print $ sum $ map (calT lVal) [1..10]
+	where lVal = map calL [4,8..10^6]
