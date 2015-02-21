@@ -1,24 +1,13 @@
-import Control.Monad
+import Data.List
+import Data.Ratio
+import Data.Monoid
+import Data.Tree
 
-type TempPair = (Float, [Int]) -- Acc,List
 
-update :: Int -> TempPair -> [TempPair]
-update m (acc,l)
-        | acc == 0.5 = [(acc,l)]
-        | acc > 0.5 = []
-        | otherwise = map (\n -> (acc+(invSqr n),n:l)) $ enumFromTo ((+1) $ head l) m
+testTree = Node 2 [Node 4 [], Node 3 []]
 
-doStep :: Int -> [TempPair] -> IO [TempPair]
-doStep m l = (print $ (show $ length l) ++ " operations to do..") >> (return $ concat $ map (update m) l)
+options = [2..5]
 
-powerSeries :: [a] -> [[a]]
-powerSeries = init . filterM (const [True,False])
-
-invSqr :: (Integral a, Floating b) => a -> b
-invSqr = (** (-2)) . fromIntegral
-
-doWhileChange :: Eq a => (a -> IO a) -> a -> IO a
-doWhileChange f x = (f x) >>= (\n -> if n == x then return x else doWhileChange f n)
-
-main = doWhileChange (doStep 45) [(0.25,[2])] >>= print
+makeTree :: (Ord a, Num a) => [a] -> a -> a -> Tree a
+makeTree opts a x = Node (a+x) $ map (makeTree opts (a+x)) $ dropWhile (>=x) opts
 

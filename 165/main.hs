@@ -1,38 +1,11 @@
-{-# LANGUAGE ExistentialQuantification #-}
-
-import System.Environment
-import Data.List (nub)
+import Data.Ratio
 import Data.Maybe
-import qualified Data.Set as S
+import Data.Set as S
+import Control.Applicative
 
-
-blumBlum :: Integral a => [a]
-blumBlum = map (flip mod 500) $  iterate (flip mod 50515093 . (^2) ) 290797
-
-type Point = (Double,Double)
-type LineSeg = (Point,Point)
-
-intersectionPoint :: LineSeg -> LineSeg -> Point
-intersectionPoint ((x1,y1),(x2,y2)) ((a1,b1),(a2,b2)) = (x',y')
-	where m1 = (y1 - y2) / (x1 - x2)
-	      m2 = (b1 - b2) / (a1 - a2)
-	      x' = (y1 - m1*x1 - b1 + m2*a1) / (m2 - m1)
-	      c = y1 - m1*x1
-	      y' = x'*m1 + c
-
-isInteriorPoint :: Point -> LineSeg -> Bool
-isInteriorPoint p (p1,p2) = not $ all (==p) [p1,p2]
-
-isBetween :: Ord a => a -> a -> a -> Bool
-isBetween a b c = (a > c && b < c) || (a < c && b > c)
-
-isInLine :: Point -> LineSeg -> Bool
-isInLine (a,b) ((x1,y1),(x2,y2)) = isBetween x1 x2 a && isBetween y1 y2 b
-
-isValid :: LineSeg -> LineSeg -> Maybe Point
-isValid l1 l2 = if and [isInLine p l1, isInLine p l2, isInteriorPoint p l1, 
-		isInteriorPoint p l2] then Just p else Nothing
-	where p = intersectionPoint l1 l2
+type Point = (Rational, Rational)
+type MCPair = (Maybe Rational, Maybe Rational)
+type LineSeg = (Point,Point,MCPair)
 
 ordNub :: Ord a => [a] -> [a]
 ordNub l = helper S.empty l
@@ -40,15 +13,22 @@ ordNub l = helper S.empty l
 	      helper s (x:xs) = if x `S.member` s then helper s xs
 					else x: helper (S.insert x s) xs
 
-genPairings :: [a] -> [(a,a)]
-genPairings (x:[]) = []
-genPairings (x:xs) = (zip (repeat x) xs) ++ (genPairings xs)
+makeMC :: (Point,Point) -> MCPair
+makeMC ((x1,y1),(x2,y2)) = (m,c)
+	where m = if (x1 == x2) then Just ( (y1 - y2) / (x1 - x2)) else Nothing
+	      c = (y1 - ) . (*x1) <$> m
 
-makeLineSeg :: [Double] -> [LineSeg]
-makeLineSeg (a:b:c:d:xs) = ( (a,b),(c,d)) : makeLineSeg xs
-makeLineSeg _ = []
+makeLineSeg :: (Point,Point) -> LineSeg
+makeLineSeg p@(p1,p2) = (p1,p2,makeMC p)
 
-main = getArgs >>= (return . read . head) >>= print . run
-	
-run x = length $ ordNub $ mapMaybe (uncurry isValid) $ genPairings $ 
-	makeLineSeg $ take (4*x) $ tail $ map (fromIntegral) blumBlum
+isBetween :: Ord a => a -> a -> a -> Bool
+isBetween a b n = (a > n && b < n) || (a < n && b > n)
+
+pointOnLine :: LineSeg -> Point -> Bool
+pointOnLine ((x1,y1),(x2,y2),_) (x,y) = isBetween x1 x2 x && isBetween y1 y2 y
+
+intersectionPoint :: LineSeg -> LineSeg -> Maybe Point
+intersectionPoint ((x',y'),_,(m1,c1)) :wq
+
+	where findX m1 c1 m2 c2 = (c1 - c2) / (m2 - m1)
+	      findY y m x = y - m*x

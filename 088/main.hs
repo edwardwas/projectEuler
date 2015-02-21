@@ -1,21 +1,36 @@
 import System.Environment
 import Data.List
+import Data.Array
+
+bigNum :: Integer
+bigNum = 10^7
 
 intSqrt :: Integral a => a -> a
 intSqrt = floor . sqrt . fromIntegral
 
-factorWays :: Integral a => a -> [[a]]
-factorWays 2 = [[2]]
-factorWays x = [[x]] ++ (concat $ map helper [2.. intSqrt x])
+factorWaysCal :: Integer -> [[Integer]]
+factorWaysCal 2 = [[2]]
+factorWaysCal x = [[x]] ++ (concat $ map helper [2.. intSqrt x])
 	where helper a = map (a:) $ factorWays $ div x a
 
-validFactor :: Integral a => a -> [a] -> Bool
+factorWays :: Integer -> [[Integer]]
+factorWays = (!) arr
+	where arr = array (2,bigNum) $ zip [2..bigNum] $ map factorWaysCal [2..bigNum]
+
+sumProdNum :: Integer -> [(Integer,Integer,Integer)]
+sumProdNum = (!) (array (2,bigNum) $ zip [2..bigNum] $ map helper [2..bigNum])
+	where helper = map (\x -> (sum x, product x, fromIntegral $ length x)) . factorWays
+
+validFactor :: Integer -> [Integer] -> Bool
 validFactor k p = (product p) == ( (sum p) + k - (fromIntegral $ length p))
 
-validNumber :: Integral a => a -> a -> Bool
+validNumber' :: Integer -> Integer -> Bool
+validNumber' k = any (\(s,p,l) -> p == s + k -l) . sumProdNum
+
+validNumber :: Integer -> Integer -> Bool
 validNumber k = any (validFactor k) . factorWays
 
-smallestValidNumber :: Integral a => a -> a
-smallestValidNumber k = head $ filter (validNumber k) [2..]
+smallestValidNumber :: Integer -> Integer
+smallestValidNumber k = head $ filter (validNumber' k) [k..]
 
 main = getArgs >>= print . sum . nub . map smallestValidNumber . enumFromTo 2 . read . head
